@@ -1,0 +1,240 @@
+<div class="d-flex justify-content-between flex-wrap flex-md nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2" id="edit_label">Editing: </h1>
+  <div class="btn-toolbar mb-2 mb-md 0">
+    <div class="btn-group me-2">
+      <button class="btn btn-sm btn-outline-secondary">?</button>
+    </div>
+  </div>
+</div>
+<div class="col py-3">
+  <div class="row">
+    <div class="col">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+          <li class="breadcrumb-item active"></li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col text-end fw-lighter">
+      <b>Last Updated: <span id="last_updated_span"></span> </b>
+      <b>UserId: <span id="user_id_span"></span> </b>
+    </div>
+  </div>
+</div>
+<form action="" method="POST" id="form_put">
+  <div class="row">
+    <div class="col-4 mb-3">
+      <img src="" id="image" style="border-radius: 30px; height: 100px; width: 100px;" alt="">
+    </div>
+    <input type="file" class="mb-2" id="imageInput" name="image">
+    <button type="button" class="btn btn-secondary btn-sm col-2 mx-2" onclick="uploadImage()">Upload image</button>
+  </div>
+
+  <div class="row form-group mb-4">
+    <div class="col">
+      <label for="firstName">First Name</label>
+      <input type="text" class="form-control" id="firstName" name="firstName" value="" placeholder="First Name"
+        required>
+    </div>
+
+    <div class="col">
+      <label for="lastName">Last Name</label>
+      <input type="text" class="form-control" id="lastName" name="lastName" value="" placeholder="Last Name" required>
+    </div>
+  </div>
+
+  <div class="row form-group mb-4">
+    <div class="col">
+      <label for="tel">Telephone</label>
+      <input type="text" class="form-control" id="tel" name="tel" value="" placeholder="Telephone" required>
+    </div>
+
+    <div class="col">
+      <label for="email">Email</label>
+      <input type="text" class="form-control" id="email" name="email" value="" placeholder="Email" required>
+    </div>
+  </div>
+
+  <div class="form-group mb-4">
+    <label for="details">Customer Details</label>
+    <textarea class="form-control" name="details" id="details" cols="30" rows="12"
+      placeholder="Customer Details"></textarea>
+  </div>
+
+  <div class="form-group mb-4">
+    <button type="submit" class="btn btn-primary">Update Customer</button>
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" id="deleteButton"
+      data-bs-target="#deleteModal">Delete Customer</button>
+  </div>
+</form>
+
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="deleteModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">You are about to remove a customer record.</div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          This will remove the customer record of <b class="fw-bold" id="customer_firstName"></b><br />
+          Are you sure?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <form id="deleteCustomer" class="position-relative">
+          <button type="submit" class="btn btn-primary">Yes, Remove Customer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  var token = sessionStorage.getItem("token")
+
+  const url = window.location.href;
+  const urlSplited = url.split('/')
+  let id = urlSplited[4]
+  async function getCustomerById() {
+    const response = await fetch(`/api/customers/${id}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+    const responseData = await response.json();
+    if (response.ok) {
+      document.getElementById('edit_label').innerHTML = "Editing : " + responseData.firstName + " " + responseData.lastName
+      document.getElementById("user_id_span").textContent = responseData._id;
+      document.getElementById("last_updated_span").textContent = new Date(responseData.updatedAt).toDateString();
+      document.getElementById('firstName').value = responseData.firstName
+      document.getElementById('lastName').value = responseData.lastName
+      document.getElementById('tel').value = responseData.tel
+      document.getElementById('email').value = responseData.email
+      document.getElementById('details').textContent = responseData.details
+      document.getElementById('image').src = "/img/" + responseData.image;
+      document.getElementById('customer_firstName').textContent = responseData.firstName
+    } else {
+      alert("Ops customer not found")
+      window.location = "/customers"
+    }
+  }
+
+  function uploadImage() {
+    const input = document.getElementById('imageInput');
+    console.log(input)
+    const file = input.files[0];
+
+    if (!file) {
+      alert("Please select a file.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    fetch(`/api/customers/image/${id}`, {
+      method: 'PUT',
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Upload failed.');
+        }
+        return response.json();
+      })
+      .then(data => {
+        alert("success upload image")
+        getCustomerById()
+      })
+      .catch(error => {
+        alert(error.message)
+      });
+  }
+
+
+  async function updateCustomer() {
+
+    const customerData = {
+      firstName: document.getElementById('firstName').value,
+      lastName: document.getElementById('lastName').value,
+      tel: document.getElementById('tel').value,
+      email: document.getElementById('email').value,
+      details: document.getElementById('details').value,
+    };
+    // Send PUT request to update customer data
+    fetch(`/api/customers/${id}`, {
+      method: 'PUT', // Change method to POST because HTML forms only support GET and POST
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(customerData)
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Update failed.');
+        }
+        return response.json();
+      })
+      .then(data => {
+        alert("Success update ")
+        window.location.reload()
+      })
+      .catch(error => {
+        alert("Failed to update customer")
+        console.error('Error updating customer:', error.message);
+      });
+  }
+
+
+  document.getElementById('form_put').addEventListener('submit', function (event) {
+    event.preventDefault(); // Prevent the default form submission behavior
+    updateCustomer()
+  });
+
+
+  async function deleteCustomer() {
+    fetch(`/api/customers/${id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+
+      }
+    }).then(data => {
+      alert("success delete")
+      window.location = "/customers"
+    }).catch(error => {
+      alert("Failed to delete")
+    })
+  }
+
+  document.getElementById('deleteCustomer').addEventListener('submit', function (event) {
+    event.preventDefault(); // Prevent the default form submission behavior
+    deleteCustomer()
+  });
+
+
+  const imageInput = document.getElementById('imageInput');
+  const image = document.getElementById('image');
+  imageInput.addEventListener('change', function (e) {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        image.src = e.target.result;
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  });
+
+  window.addEventListener("load", getCustomerById);
+</script>

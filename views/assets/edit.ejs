@@ -1,0 +1,244 @@
+<div class="d-flex justify-content-between flex-wrap flex-md nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2" id="edit_label">Editing:</h1>
+  <div class="btn-toolbar mb-2 mb-md 0">
+    <div class="btn-group me-2">
+      <button class="btn btn-sm btn-outline-secondary">?</button>
+    </div>
+  </div>
+</div>
+<div class="col py-3">
+  <div class="row">
+    <div class="col">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+          <li class="breadcrumb-item active"></li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col text-end fw-lighter">
+      <b>Last Updated: <span id="last_updated_span"></span> </b>
+      <b>assets Id: <span id="assets_id_span"></span> </b>
+    </div>
+  </div>
+</div>
+
+<div id="notification"></div>
+
+<form id="form_put">
+  <div class="row form-group mb-4">
+    <div class="row">
+      <div class="col-4 mb-3">
+        <img src="" id="image" style="border-radius: 30px; height: 100px; width: 100px;" alt="">
+      </div>
+      <input type="file" class="mb-2" id="imageInput" name="image">
+    </div>
+
+    <div class="col">
+      <label for="firstName">Nama</label>
+      <input type="text" class="form-control" id="inputNama" name="firstName" value="" placeholder="First Name"
+        required />
+    </div>
+  </div>
+
+  <div class="form-group mb-4">
+    <label for="details">Price</label>
+    <input type="number" id="price" class="form-control" />
+  </div>
+  <div class="form-group mb-4">
+    <label for="category" class="mb-2">Category</label>
+    <select name="" class="form-control" id="category">
+      <option value="">Pilih Kategori</option>
+    </select>
+  </div>
+
+  <div class="form-group mb-4">
+    <button type="submit" class="btn btn-primary">Update assets</button>
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" id="deleteButton" data-bs-target="#deleteModal">
+      Delete assets
+    </button>
+  </div>
+</form>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="deleteModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">You are about to remove a assets record.</div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          This will remove the assets record of
+          <b class="fw-bold" id="assets"></b><br />
+          Are you sure?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <form id="deleteassets" class="position-relative">
+          <button type="submit" class="btn btn-primary">
+            Yes, Remove assets
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var token = sessionStorage.getItem("token");
+
+  const url = window.location.href;
+  const urlSplited = url.split("/");
+  let id = urlSplited[4];
+
+  let inputNama = document.getElementById("inputNama");
+  let inputPrice = document.getElementById("price");
+
+  async function getassetsById() {
+    const response = await fetch(`/api/assets/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+    const responseData = await response.json();
+    if (response.ok) {
+      inputNama.value = responseData.nama;
+      inputPrice.value = responseData.price;
+      document.getElementById("assets_id_span").textContent = responseData._id;
+      document.getElementById('image').src = "/img/" + responseData.image;
+    } else {
+      alert("assets not found");
+      window.location = "/categories";
+    }
+  }
+
+  async function getCategories() {
+    try {
+      const response = await fetch("/api/categories", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch categories");
+      }
+
+      const categories = await response.json();
+      const selectElement = document.getElementById("category");
+
+      categories.forEach((category) => {
+        const option = document.createElement("option");
+        option.value = category._id; // Ganti _id dengan properti yang sesuai dari respons API
+        option.textContent = category.nama; // Ganti nama dengan properti yang sesuai dari respons API
+        selectElement.appendChild(option);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  getCategories();
+
+  document
+    .getElementById("form_put")
+    .addEventListener("submit", function (event) {
+      event.preventDefault(); // Prevent the default form submission behavior
+      updateassets();
+    });
+
+  async function deleteassets() {
+    fetch(`/api/assets/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((data) => {
+        alert("success delete");
+        window.location = "/assets";
+      })
+      .catch((error) => {
+        alert("Failed to delete");
+      });
+  }
+
+  document
+    .getElementById("deleteassets")
+    .addEventListener("submit", function (event) {
+      event.preventDefault(); // Prevent the default form submission behavior
+      deleteassets();
+    });
+
+  window.addEventListener("load", getassetsById);
+
+  async function updateassets() {
+    let data = {
+      nama: inputNama.value,
+      price: inputPrice.value,
+      kategori: document.getElementById("category").value,
+    };
+
+    const formData = new FormData();
+    formData.append("nama", data.nama)
+    formData.append("price", data.price)
+    formData.append("kategori", data.kategori)
+    const input = document.getElementById('imageInput');
+    console.log(input)
+    const file = input.files[0];
+    formData.append('image', file);
+
+
+    var result = await fetch(`/api/assets/${id}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    var responseData = await result.json();
+    const alertElement = document.createElement("div");
+
+    if (result.ok) {
+      alertElement.classList.add("alert", "alert-success", "role", "alert");
+      alertElement.textContent = "Data berhasil diperbarui!";
+      // Sisipkan alert ke dalam DOM
+      const targetElement = document.getElementById("notification"); // Ubah `target-element-id` dengan ID elemen yang ingin Anda jadikan target
+      targetElement.appendChild(alertElement);
+
+      setTimeout(() => {
+        alertElement.remove();
+        window.location = "/assets";
+      }, 3000);
+    } else {
+      alertElement.classList.add("alert", "alert-danger", "role", "alert");
+      alertElement.textContent = responseData.error;
+      // Sisipkan alert ke dalam DOM
+      const targetElement = document.getElementById("notification"); // Ubah `target-element-id` dengan ID elemen yang ingin Anda jadikan target
+      targetElement.appendChild(alertElement);
+
+      setTimeout(() => {
+        alertElement.remove();
+      }, 3000);
+    }
+  }
+
+  const imageInput = document.getElementById('imageInput');
+  const image = document.getElementById('image');
+  imageInput.addEventListener('change', function (e) {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        image.src = e.target.result;
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  });
+</script>

@@ -1,0 +1,107 @@
+<div class="container">
+  <div
+    class="d-flex justify-content-between flex-wrap flex-md nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+  >
+    <h1 class="h2">Data Category</h1>
+    <div class="btn-toolbar mb-2 mb-md 0">
+      <div class="btn-group me-2">
+        <a href="/categories/add" class="btn btn-sm btn-outline-secondary"
+          >+ New Category</a
+        >
+      </div>
+    </div>
+  </div>
+  <table class="table" id="myTable">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Category Name</th>
+        <th>Description</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+
+    var token = sessionStorage.getItem("token")
+
+    async function getCustomerData() {
+      try {
+        const response = await fetch("/api/categories" , {
+          headers : {
+            "Authorization"  : `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          alert(response.statusText)
+          if(response.status == 401){
+            window.location = "/auth"
+          }
+        }
+        return await response.json();
+      } catch (error) {
+        throw error;
+      }
+    }
+    async function populateTable() {
+      try {
+        const tableBody = document.querySelector("#myTable tbody");
+        tableBody.innerHTML = "Loading";
+        const customerData = await getCustomerData();
+        tableBody.innerHTML = "";
+        customerData.forEach((customer, index) => {
+          const row = `
+              <tr>
+                <td>${index + 1}</td>
+                <td>${customer.nama}</td>
+                <td>${customer.deskripsi}</td>
+                <td>
+                  <a href="/categories/${
+                    customer._id
+                  }" class="btn btn-secondary">
+                    <i class="bi bi-info-square"></i> Detail
+                  </a>
+                  <button class="btn btn-danger" onclick="deleteCategory('${
+                    customer._id
+                  }')">
+                    <i class="bi bi-trash"></i> Delete</button>
+                </div>
+                </td>
+              </tr>
+            `;
+          tableBody.innerHTML += row;
+          $(document).ready(function () {
+            $("#myTable").DataTable();
+          });
+        });
+      } catch (error) {
+        const tableBody = document.querySelector("#myTable tbody");
+        tableBody.innerHTML = `
+            <tr>
+              <td colspan="6" class="text-center">Error fetching data: ${error.message}</td>
+            </tr>
+          `;
+      }
+    }
+    // Call populateTable when the page is loaded
+    window.addEventListener("load", populateTable);
+
+    async function deleteCategory(id) {
+      fetch(`/api/categories/${id}`, {
+        method: "DELETE",
+        headers:{
+          Authorization: `Bearer ${token}`,
+        }
+      })
+        .then((data) => {
+          alert("success delete");
+          window.location.reload()
+        })
+        .catch((error) => {
+          alert("Failed to delete");
+        });
+    }
+  </script>
+</div>

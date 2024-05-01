@@ -1,0 +1,201 @@
+<div
+  class="d-flex justify-content-between flex-wrap flex-md nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+>
+  <h1 class="h2">Customer</h1>
+  <div class="btn-toolbar mb-2 mb-md 0">
+    <div class="btn-group me-2">
+      <button class="btn btn-sm btn-outline-secondary">?</button>
+    </div>
+  </div>
+</div>
+
+<div class="col py-3">
+  <div class="row">
+    <div class="col">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+          <li class="breadcrumb-item active">New Customer</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col text-end fw-lighter">
+      <b>UserId</b>
+    </div>
+  </div>
+</div>
+
+
+<div id="notification"></div>
+
+<form  method="POST" id="form_add">
+  <div class="row">
+    <div class="col-4 mb-3">
+      <img hidden
+        src=""
+        id="image"
+        style="border-radius: 30px; height: 100px; width: 100px"
+        alt=""
+      />
+    </div>
+    <input type="file" class="mb-2" id="imageInput" name="image" />
+  </div>
+
+  <div class="row form-group mb-4">
+    <div class="col">
+      <label for="firstName">First Name</label>
+      <input
+        type="text"
+        class="form-control"
+        id="firstName"
+        name="firstName"
+        value=""
+        placeholder="First Name"
+        required
+      />
+    </div>
+
+    <div class="col">
+      <label for="lastName">Last Name</label>
+      <input
+        type="text"
+        class="form-control"
+        id="lastName"
+        name="lastName"
+        value=""
+        placeholder="Last Name"
+        required
+      />
+    </div>
+  </div>
+
+  <div class="row form-group mb-4">
+    <div class="col">
+      <label for="tel">Telephone</label>
+      <input
+        type="text"
+        class="form-control"
+        id="tel"
+        name="tel"
+        value=""
+        placeholder="Telephone"
+        required
+      />
+    </div>
+
+    <div class="col">
+      <label for="email">Email</label>
+      <input
+        type="text"
+        class="form-control"
+        id="email"
+        name="email"
+        value=""
+        placeholder="Email"
+        required
+      />
+    </div>
+  </div>
+
+  <div class="form-group mb-4">
+    <label for="details">Customer Details</label>
+    <textarea
+      class="form-control"
+      name="details"
+      id="details"
+      cols="30"
+      rows="12"
+      placeholder="Customer Details"
+    ></textarea>
+  </div>
+
+  <div class="form-group mb-4">
+    <button type="submit" class="btn btn-primary">Add Customer</button>
+  </div>
+</form>
+<script>
+  var token = sessionStorage.getItem("token")
+
+  const imageInput = document.getElementById('imageInput');
+  const image = document.getElementById('image');
+  imageInput.addEventListener('change', function(e) {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        image.src = e.target.result;
+        image.removeAttribute("hidden")
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  });
+
+
+  function addCustomer() {  
+    const firstName = document.getElementById('firstName').value;
+    const lastName = document.getElementById('lastName').value;
+    const tel = document.getElementById('tel').value;
+    const email = document.getElementById('email').value;
+    const details = document.getElementById('details').value;
+    
+    // Dapatkan file gambar yang diunggah
+    const imageInput = document.getElementById('imageInput');
+    const imageFile = imageInput.files[0];
+    
+    // Buat objek FormData untuk mengirim data
+    const formData = new FormData();
+    formData.append('firstName', firstName);
+    formData.append('lastName', lastName);
+    formData.append('tel', tel);
+    formData.append('email', email);
+    formData.append('details', details);
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+    
+    // Kirim permintaan POST ke API
+    fetch('/api/customers', {
+      method: 'POST',
+      body: formData,
+      headers :{
+        "Authorization" : `Bearer ${token}`
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to add customer');
+      }
+      return response.json();
+    })
+    .then(data => {
+      const alertElement = document.createElement("div");
+      alertElement.classList.add("alert", "alert-success", "role", "alert");
+      alertElement.textContent = "Data berhasil ditambahkan!";
+      // Sisipkan alert ke dalam DOM
+      const targetElement = document.getElementById("notification"); // Ubah `target-element-id` dengan ID elemen yang ingin Anda jadikan target
+      targetElement.appendChild(alertElement);
+
+      setTimeout(() => {
+        alertElement.remove();
+        window.location = "/customers";
+      }, 3000);
+    })
+    .catch(error => {
+      const alertElement = document.createElement("div");
+      alertElement.classList.add("alert", "alert-danger", "role", "alert");
+      alertElement.textContent = error;
+      // Sisipkan alert ke dalam DOM
+      const targetElement = document.getElementById("notification"); // Ubah `target-element-id` dengan ID elemen yang ingin Anda jadikan target
+      targetElement.appendChild(alertElement);
+
+      setTimeout(() => {
+        alertElement.remove();
+        window.location = "/customer/add";
+      }, 3000);
+    });
+  }
+
+  document.getElementById("form_add").addEventListener("submit" , function(event){
+    event.preventDefault(); // Prevent the default form submission behavior
+    addCustomer()
+  });
+</script>

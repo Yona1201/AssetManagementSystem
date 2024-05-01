@@ -1,0 +1,110 @@
+<div class="container">
+  <div class="d-flex justify-content-between flex-wrap flex-md nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Data Customer</h1>
+    <div class="btn-toolbar mb-2 mb-md 0">
+      <div class="btn-group me-2">
+        <a href="/customer/add" class="btn btn-sm btn-outline-secondary">+ New User</a>
+      </div>
+    </div>
+  </div>
+  <table class="table" id="myTable">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Image</th>
+        <th>Firstname</th>
+        <th>Lastname</th>
+        <th>Tel</th>
+        <th>Detail</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    var token = sessionStorage.getItem("token")
+
+    async function getCustomerData() {
+      try {
+        const response = await fetch("/api/customers", {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          if (response.status == 401) {
+            alert(response.statusText)
+            window.location = "/auth";
+          }
+          throw new Error(`HTTP error ${response.status}`);
+        }
+        return await response.json();
+      } catch (error) {
+        throw error;
+      }
+    }
+    async function populateTable() {
+      try {
+        const tableBody = document.querySelector("#myTable tbody");
+        tableBody.innerHTML = "Loading";
+        const customerData = await getCustomerData();
+        tableBody.innerHTML = "";
+        customerData.forEach((customer, index) => {
+          const row = `
+            <tr>
+              <td>${index + 1}</td>
+              <td>
+                  <img style='height:70px;border-radius:20px' src='/img/${customer.image
+            }'></img>
+              </td>
+              <td>${customer.firstName}</td>
+              <td>${customer.lastName}</td>
+              <td>${customer.tel}</td>
+              <td>${customer.details}</td>
+              <td>
+                <a href="/customers/${customer._id}" class="btn btn-secondary">
+                  <i class="bi bi-info-square"></i> 
+                </a>  
+                <button class="btn btn-danger" onclick="deleteCustomer('${customer._id
+            }')">
+                  <i class="bi bi-trash"></i> Delete</button>
+              </div>
+              </td>
+            </tr>
+          `;
+          tableBody.innerHTML += row;
+          $(document).ready(function () {
+            $("#myTable").DataTable();
+          });
+        });
+      } catch (error) {
+        const tableBody = document.querySelector("#myTable tbody");
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center">Error fetching data: ${error.message}</td>
+          </tr>
+        `;
+      }
+    }
+
+    async function deleteCustomer(id) {
+      fetch(`/api/customers/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      })
+        .then((data) => {
+          alert("success delete");
+          window.location.reload();
+        })
+        .catch((error) => {
+          alert("Failed to delete");
+        });
+    }
+
+    // Call populateTable when the page is loaded
+    window.addEventListener("load", populateTable);
+  </script>
+</div>

@@ -1,0 +1,126 @@
+<div
+  class="d-flex justify-content-between flex-wrap flex-md nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+>
+  <h1 class="h2">Category</h1>
+  <div class="btn-toolbar mb-2 mb-md 0">
+    <div class="btn-group me-2">
+      <button class="btn btn-sm btn-outline-secondary">?</button>
+    </div>
+  </div>
+</div>
+
+<div class="col py-3">
+  <div class="row">
+    <div class="col">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+          <li class="breadcrumb-item active">New Category</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<div id="notification"></div>
+
+<form method="POST" id="form_add">
+  <div class="row form-group mb-4">
+    <div class="col">
+      <label for="firstName">Name</label>
+      <input
+        type="text"
+        class="form-control"
+        id="inputName"
+        name="firstName"
+        value=""
+        placeholder="Name category"
+        required
+      />
+    </div>
+  </div>
+
+  <div class="form-group mb-4">
+    <label for="details">Category Descriptions</label>
+    <textarea
+      class="form-control"
+      name="details"
+      id="inputDescription"
+      cols="30"
+      rows="5"
+      placeholder="Category Descriptions"
+    ></textarea>
+  </div>
+  <div class="form-group mb-4">
+    <button type="button" onclick="addcategory()" class="btn btn-primary">
+      Add Category
+    </button>
+  </div>
+</form>
+<script>
+  var token = sessionStorage.getItem("token")
+
+  const imageInput = document.getElementById("imageInput");
+  const image = document.getElementById("image");
+  imageInput.addEventListener("change", function (e) {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        image.src = e.target.result;
+        image.removeAttribute("hidden");
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  });
+
+  let notif = document.getElementsByClassName("notifications");
+
+  async function addcategory() {
+    const name = document.getElementById("inputName").value;
+    const description = document.getElementById("inputDescription").value;
+    const data = {
+      nama: name,
+      deskripsi: description,
+    };
+
+    var result = await fetch("/api/categories", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+        "Authorization" : `Bearer ${token}`
+
+      },
+      body: JSON.stringify(data),
+    });
+    var response = await result.json();
+    if (result.ok) {
+      const alertElement = document.createElement("div");
+      alertElement.classList.add("alert", "alert-success", "role", "alert");
+      alertElement.textContent = "Data berhasil ditambahkan!";
+      // Sisipkan alert ke dalam DOM
+      const targetElement = document.getElementById("notification"); // Ubah `target-element-id` dengan ID elemen yang ingin Anda jadikan target
+      targetElement.appendChild(alertElement);
+
+      setTimeout(() => {
+        alertElement.remove();
+        window.location = "/categories";
+      }, 3000);
+    } else {
+      const alertElement = document.createElement("div");
+      alertElement.classList.add("alert", "alert-danger", "role", "alert");
+      alertElement.textContent = response.error;
+      // Sisipkan alert ke dalam DOM
+      const targetElement = document.getElementById("notification"); // Ubah `target-element-id` dengan ID elemen yang ingin Anda jadikan target
+      targetElement.appendChild(alertElement);
+
+      // Sembunyikan alert setelah beberapa detik (opsional)
+      setTimeout(() => alertElement.remove(), 3000);
+    }
+  }
+
+  document
+    .getElementById("form_add")
+    .addEventListener("submit", function (event) {
+      event.preventDefault(); // Prevent the default form submission behavior
+    });
+</script>

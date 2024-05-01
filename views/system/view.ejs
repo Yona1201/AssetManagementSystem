@@ -1,0 +1,164 @@
+<div class="container">
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Data About</h1>
+        <div class="btn-toolbar mb-2 mb-md 0">
+            <div class="btn-group me-2">
+
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="row mr-2">
+            <label for="">Banner</label>
+            <form action="" method="post" id="form-banner">
+                <div class="col form-control">
+                    <input type="file" name="banner" id="banner">
+                    <button class="btn btn-secondary">Simpan</button>
+                </div>
+            </form>
+        </div>
+        <div class="row">
+            <label for="">image</label>
+            <form action="" method="post" id="form-image">
+                <div class="col form-control">
+                    <input type="file" id="image">
+                    <button class="btn btn-secondary">Simpan</button>
+                </div>
+            </form>
+        </div>
+        <div class="row container">
+            <label for="">Banner</label>
+            <div class="col form-control">
+                <form action="" method="post" id="formUpdate">
+                    <div class="mb-3">
+                        <label for="tagLine1" class="form-label">Tag Line 1</label>
+                        <input type="text" class="form-control" id="tagLine" name="tagLine1"
+                            placeholder="Enter Tag Line 1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="tagLine2" class="form-label">Header</label>
+                        <textarea type="text" class="form-control" id="header" name="tagLine2"
+                            placeholder="Masukan Header"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tagLine2" class="form-label">Description</label>
+                        <textarea type="text" class="form-control" id="description" name="tagLine2"
+                            placeholder="Masukan description"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var token = sessionStorage.getItem("token");
+
+
+
+
+    </script>
+
+    <script>
+        let header = document.getElementById('header')
+        let description = document.getElementById('description')
+        let tagLine = document.getElementById('tagLine')
+
+        async function getData() {
+            var url = '/api/about/'
+            var response = await fetch(url, {
+                method: 'get'
+            })
+            var responseJson = await response.json()
+            console.log(responseJson)
+            if (response.ok) {
+                header.value = responseJson.header
+                description.value = responseJson.description
+                tagLine.value = responseJson.tagLine
+
+            } else {
+                header.innerHTML = "harap atur data"
+                description.innerHTML = "harap atur data"
+            }
+        }
+
+
+        async function updateOrInsert() {
+            const data = {
+                "header": header.value,
+                "description": description.value,
+                "tagLine": tagLine.value
+            }
+
+            var response = await fetch("/api/about/uploadAndUpdate", {
+                body: JSON.stringify(data),
+                method: 'post',
+                headers: {
+                    'content-type': 'application/json'
+                }
+            })
+            if (response.ok) {
+                alert('success insert or update data')
+            } else {
+                alert('ops ada yang salah')
+            }
+        }
+
+        async function saveBanner() {
+            const bannerInput = document.getElementById('banner');
+            const file = bannerInput.files[0];
+            const formdata = new FormData();
+            formdata.append('banner', file);
+            var response = await fetch("/api/about/upload/banner", {
+                body: formdata,
+                method: 'post',
+            })
+            var responseJson = await response.json();
+            if (response.ok) {
+                alert(responseJson.message)
+            } else {
+                alert(responseJson.message)
+            }
+            location.reload();
+        }
+
+
+        async function saveImage() {
+            const bannerInput = document.getElementById('image');
+            const file = bannerInput.files[0];
+            const formdata = new FormData();
+            formdata.append('image', file);
+            var response = await fetch("/api/about/upload/image", {
+                body: formdata,
+                method: 'post',
+            })
+            var responseJson = await response.json();
+            if (response.ok) {
+                alert(responseJson.message)
+            } else {
+                alert(responseJson.message)
+            }
+            location.reload();
+        }
+
+        document.getElementById('formUpdate').addEventListener('submit', (event) => {
+            event.preventDefault();
+            updateOrInsert();
+        })
+
+
+        document.getElementById('form-banner').addEventListener('submit', (event) => {
+            event.preventDefault();
+            saveBanner();
+        })
+
+
+        document.getElementById('form-image').addEventListener('submit', (event) => {
+            event.preventDefault();
+            saveImage();
+        })
+
+        getData();
+    </script>
+</div>
