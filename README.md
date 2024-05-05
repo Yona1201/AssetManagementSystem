@@ -24,8 +24,14 @@ install terlebih dahulu di prompt :
 <br />
 
 ## Video Presentasi Projek Akhir
-Tonton video berikut untuk melihat Video Presentasi Projek Akhir dan bagaimana aplikasi ini dapat memudahkan pengguna dalam mengelola aset mereka.
+Tonton video berikut untuk melihat Video Presentasi Demo Program, bagaimana aplikasi ini dapat memudahkan pengguna dalam mengelola aset mereka.
 [Demo AssetManagement System](link youtube)<br>
+
+<br />
+
+## Video Presentasi Laporan Projek
+Tonton video berikut untuk melihat Video Presentasi Projek.
+[Presentasi Laporan Projek](link youtube)<br>
 
 <br />
 
