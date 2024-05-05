@@ -27,3 +27,8 @@ install terlebih dahulu di prompt :
 Tonton video berikut untuk melihat Video Presentasi Projek Akhir dan bagaimana aplikasi ini dapat memudahkan pengguna dalam mengelola aset mereka.
 [Demo AssetManagement System](link youtube)<br>
 
+
+## Laporan dan PPT Asset Management System
+Laporan dan PPT dapat dilihat secara lengkap  pada folder: **LAPORAN dan PPT**, Untuk bagian laporan : **Laporan Kelompok 8** dan untuk bagian PPT : **PPT Kelompok 8**
+<br />
+<br />
