@@ -25,5 +25,5 @@ install terlebih dahulu di prompt :
 
 ## Video Presentasi Projek Akhir
 Tonton video berikut untuk melihat Video Presentasi Projek Akhir dan bagaimana aplikasi ini dapat memudahkan pengguna dalam mengelola aset mereka.
-[Demo FoodO'Clock](link youtube)<br>
+[Demo AssetManagement System](link youtube)<br>
 
