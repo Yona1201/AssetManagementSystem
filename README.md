@@ -25,13 +25,13 @@ install terlebih dahulu di prompt :
 
 ## Video Presentasi Projek Akhir
 Tonton video berikut untuk melihat Video Presentasi Demo Program, bagaimana aplikasi ini dapat memudahkan pengguna dalam mengelola aset mereka.
-[Demo AssetManagement System](link youtube)<br>
+[Demo AssetManagement System](https://youtu.be/kij3boZiMNc?si=claUUrD4aZwYzB9y)<br>
 
 <br />
 
 ## Video Presentasi Laporan Projek
 Tonton video berikut untuk melihat Video Presentasi Projek.
-[Presentasi Laporan Projek](link youtube)<br>
+[Presentasi Laporan Projek](https://youtu.be/N73D8SAmuU4?si=Di3VrQploNJK4quK)<br>
 
 <br />
 
